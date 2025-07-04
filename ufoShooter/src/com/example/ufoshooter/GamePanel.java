@@ -24,6 +24,10 @@ public class GamePanel extends JPanel implements ActionListener, KeyListener {
     private boolean leftPressed = false;
     private boolean rightPressed = false;
 
+    // 剩餘敵人數量（用於顯示）
+    private int totalUFOsSpawned = 0;
+    private int totalUFOsDestroyed = 0;
+
     public GamePanel() {
         setPreferredSize(new Dimension(600, 400));
         setBackground(new Color(10, 10, 30)); // 改為深藍色背景
@@ -43,6 +47,7 @@ public class GamePanel extends JPanel implements ActionListener, KeyListener {
                 else if (r < 0.85) type = UFOType.FAST;
                 else type = UFOType.TANK;
                 ufos.add(new UFO(randomX, 0, type));
+                totalUFOsSpawned++; // 記錄生成數量
             }
         }).start();
 
@@ -113,6 +118,10 @@ public class GamePanel extends JPanel implements ActionListener, KeyListener {
         g2d.drawString("Life: " + life, 10, 40);
         g2d.drawString("Level: " + level, getWidth() - 100, 20);
 
+        // 顯示剩餘敵人數量
+        int enemiesLeft = totalUFOsSpawned - totalUFOsDestroyed;
+        g2d.drawString("Enemies Left: " + enemiesLeft, getWidth() - 150, 40);
+
         // 若遊戲結束，顯示 Game Over 訊息（半透明黑底）
         if (gameOver) {
             g2d.setColor(new Color(0, 0, 0, 180));
@@ -180,6 +189,7 @@ public class GamePanel extends JPanel implements ActionListener, KeyListener {
                     score += u.getScore(); // 擊中得分依 UFO 類型而定
                     level = score / 100 + 1; // 每 100 分升 1 級
                     explosions.add(new Explosion(u.x + 20, u.y + 10)); // 加入爆炸動畫
+                    totalUFOsDestroyed++; // 紀錄擊落 UFO 數量
                     break;
                 }
             }
@@ -239,6 +249,8 @@ public class GamePanel extends JPanel implements ActionListener, KeyListener {
         score = 0;
         life = 3;
         level = 1;
+        totalUFOsSpawned = 0;
+        totalUFOsDestroyed = 0;
         gameOver = false;
     }
 }
