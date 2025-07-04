@@ -20,6 +20,10 @@ public class GamePanel extends JPanel implements ActionListener, KeyListener {
     private boolean gameOver = false; // 遊戲結束判定
     private boolean titleScreen = true; // 標題畫面狀態
 
+    // 控制鍵盤持續按住的狀態
+    private boolean leftPressed = false;
+    private boolean rightPressed = false;
+
     public GamePanel() {
         setPreferredSize(new Dimension(600, 400));
         setBackground(new Color(10, 10, 30)); // 改為深藍色背景
@@ -126,6 +130,14 @@ public class GamePanel extends JPanel implements ActionListener, KeyListener {
     public void actionPerformed(ActionEvent e) {
         if (gameOver || titleScreen) return;
 
+        // 持續移動控制
+        if (leftPressed && playerX > 0) {
+            playerX -= 5;
+        }
+        if (rightPressed && playerX < getWidth() - playerWidth) {
+            playerX += 5;
+        }
+
         // 星星移動動畫
         for (Star s : stars) {
             s.move();
@@ -195,25 +207,27 @@ public class GamePanel extends JPanel implements ActionListener, KeyListener {
             return;
         }
 
-        // ← 鍵：左移
-        if (e.getKeyCode() == KeyEvent.VK_LEFT && playerX > 0) {
-            playerX -= 10;
-        }
-        // → 鍵：右移
-        else if (e.getKeyCode() == KeyEvent.VK_RIGHT && playerX < getWidth() - playerWidth) {
-            playerX += 10;
-        }
-        // 空白鍵：發射子彈
-        else if (e.getKeyCode() == KeyEvent.VK_SPACE) {
+        // 鍵盤持續移動的判定
+        if (e.getKeyCode() == KeyEvent.VK_LEFT) {
+            leftPressed = true;
+        } else if (e.getKeyCode() == KeyEvent.VK_RIGHT) {
+            rightPressed = true;
+        } else if (e.getKeyCode() == KeyEvent.VK_SPACE) {
             bullets.add(new Bullet(playerX + playerWidth / 2 - 2, 360));
-        }
-        // R 鍵：重新開始遊戲
-        else if (e.getKeyCode() == KeyEvent.VK_R && gameOver) {
+        } else if (e.getKeyCode() == KeyEvent.VK_R && gameOver) {
             resetGame();
         }
     }
 
-    @Override public void keyReleased(KeyEvent e) {}
+    @Override
+    public void keyReleased(KeyEvent e) {
+        if (e.getKeyCode() == KeyEvent.VK_LEFT) {
+            leftPressed = false;
+        } else if (e.getKeyCode() == KeyEvent.VK_RIGHT) {
+            rightPressed = false;
+        }
+    }
+
     @Override public void keyTyped(KeyEvent e) {}
 
     // 重新開始遊戲的邏輯
