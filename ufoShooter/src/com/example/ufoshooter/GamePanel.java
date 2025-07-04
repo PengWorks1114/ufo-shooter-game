@@ -33,7 +33,12 @@ public class GamePanel extends JPanel implements ActionListener, KeyListener {
         new Timer(1000, e -> {
             if (!gameOver && !titleScreen) {
                 int randomX = (int)(Math.random() * (getWidth() - 40));
-                ufos.add(new UFO(randomX, 0));
+                UFOType type;
+                double r = Math.random();
+                if (r < 0.6) type = UFOType.NORMAL;
+                else if (r < 0.85) type = UFOType.FAST;
+                else type = UFOType.TANK;
+                ufos.add(new UFO(randomX, 0, type));
             }
         }).start();
 
@@ -87,14 +92,9 @@ public class GamePanel extends JPanel implements ActionListener, KeyListener {
             g2d.fillRoundRect(b.x, b.y, 4, 10, 4, 4);
         }
 
-        // 畫出 UFO 敵人（銀灰 + 陰影）
+        // 畫出 UFO 敵人（使用各自類型的 draw 方法）
         for (UFO u : ufos) {
-            g2d.setColor(Color.DARK_GRAY);
-            g2d.fillOval(u.x + 3, u.y + 3, 40, 20); // 陰影
-            g2d.setColor(Color.LIGHT_GRAY);
-            g2d.fillOval(u.x, u.y, 40, 20); // 本體
-            g2d.setColor(Color.GRAY);
-            g2d.drawOval(u.x, u.y, 40, 20); // 邊框
+            u.draw(g2d);
         }
 
         // 畫出爆炸動畫
@@ -165,7 +165,7 @@ public class GamePanel extends JPanel implements ActionListener, KeyListener {
                 if (b.x >= u.x && b.x <= u.x + 40 && b.y >= u.y && b.y <= u.y + 20) {
                     it.remove();
                     uit2.remove();
-                    score += 10; // 擊中得分
+                    score += u.getScore(); // 擊中得分依 UFO 類型而定
                     level = score / 100 + 1; // 每 100 分升 1 級
                     explosions.add(new Explosion(u.x + 20, u.y + 10)); // 加入爆炸動畫
                     break;
