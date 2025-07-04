@@ -11,6 +11,9 @@ public class GamePanel extends JPanel implements ActionListener, KeyListener {
     private int playerX = 250;
     private final int playerWidth = 40;
     private ArrayList<Bullet> bullets = new ArrayList<>();
+    private ArrayList<UFO> ufos = new ArrayList<>(); // UFO 敵人列表
+    private int score = 0; // 分數
+    private boolean gameOver = false; // 遊戲結束判定
 
     public GamePanel() {
         setPreferredSize(new Dimension(600, 400));
@@ -20,6 +23,16 @@ public class GamePanel extends JPanel implements ActionListener, KeyListener {
 
         timer = new Timer(20, this); // 每 20ms 更新一次畫面
         timer.start();
+
+        // UFO 產生計時器（每 1 秒）
+        new Timer(1000, e -> {
+            if (!gameOver) {
+                int randomX = (int)(Math.random() * (getWidth() - 40));
+                ufos.add(new UFO(randomX, 0));
+            }
+        }).start();
+
+        requestFocusInWindow(); // 確保能接收鍵盤輸入
     }
 
     @Override
@@ -35,10 +48,28 @@ public class GamePanel extends JPanel implements ActionListener, KeyListener {
         for (Bullet b : bullets) {
             g.fillRect(b.x, b.y, 4, 10);
         }
+
+        // 畫出 UFO 敵人
+        g.setColor(Color.RED);
+        for (UFO u : ufos) {
+            g.fillOval(u.x, u.y, 40, 20);
+        }
+
+        // 畫出分數
+        g.setColor(Color.WHITE);
+        g.drawString("Score: " + score, 10, 20);
+
+        // 若遊戲結束，顯示 Game Over 訊息
+        if (gameOver) {
+            g.setFont(new Font("Arial", Font.BOLD, 30));
+            g.drawString("Game Over!", 200, 180);
+        }
     }
 
     @Override
     public void actionPerformed(ActionEvent e) {
+        if (gameOver) return;
+
         // 子彈移動與移除畫面外的子彈
         Iterator<Bullet> it = bullets.iterator();
         while (it.hasNext()) {
@@ -46,6 +77,32 @@ public class GamePanel extends JPanel implements ActionListener, KeyListener {
             b.move();
             if (b.isOutOfScreen()) {
                 it.remove();
+            }
+        }
+
+        // UFO 移動與 Game Over 判定
+        Iterator<UFO> uit = ufos.iterator();
+        while (uit.hasNext()) {
+            UFO u = uit.next();
+            u.move();
+            if (u.isOutOfScreen()) {
+                gameOver = true;
+            }
+        }
+
+        // 子彈與 UFO 碰撞判定
+        it = bullets.iterator();
+        while (it.hasNext()) {
+            Bullet b = it.next();
+            Iterator<UFO> uit2 = ufos.iterator();
+            while (uit2.hasNext()) {
+                UFO u = uit2.next();
+                if (b.x >= u.x && b.x <= u.x + 40 && b.y >= u.y && b.y <= u.y + 20) {
+                    it.remove();
+                    uit2.remove();
+                    score += 10; // 擊中得分
+                    break;
+                }
             }
         }
 
