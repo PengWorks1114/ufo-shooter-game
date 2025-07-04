@@ -63,6 +63,8 @@ public class GamePanel extends JPanel implements ActionListener, KeyListener {
         if (gameOver) {
             g.setFont(new Font("Arial", Font.BOLD, 30));
             g.drawString("Game Over!", 200, 180);
+            g.setFont(new Font("Arial", Font.PLAIN, 16));
+            g.drawString("Press R to restart", 210, 220);
         }
     }
 
@@ -123,8 +125,21 @@ public class GamePanel extends JPanel implements ActionListener, KeyListener {
         else if (e.getKeyCode() == KeyEvent.VK_SPACE) {
             bullets.add(new Bullet(playerX + playerWidth / 2 - 2, 360));
         }
+        // R 鍵：重新開始遊戲
+        else if (e.getKeyCode() == KeyEvent.VK_R && gameOver) {
+            resetGame();
+        }
     }
 
     @Override public void keyReleased(KeyEvent e) {}
     @Override public void keyTyped(KeyEvent e) {}
+
+    // 重新開始遊戲的邏輯
+    private void resetGame() {
+        playerX = 250;
+        bullets.clear();
+        ufos.clear();
+        score = 0;
+        gameOver = false;
+    }
 }
