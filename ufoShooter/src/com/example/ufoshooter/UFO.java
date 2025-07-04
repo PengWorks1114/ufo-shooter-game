@@ -8,11 +8,12 @@ public class UFO {
         this.y = y;
     }
 
-    public void move() {
-        y += 2; // 向下移動速度
+    public void move(int level) {
+        y += 1 + level; // 基礎速度 + 等級加成
     }
 
     public boolean isOutOfScreen() {
         return y > 400;
     }
 }
+

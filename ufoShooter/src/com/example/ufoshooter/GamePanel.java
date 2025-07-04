@@ -14,11 +14,12 @@ public class GamePanel extends JPanel implements ActionListener, KeyListener {
     private ArrayList<UFO> ufos = new ArrayList<>(); // UFO 敵人列表
     private int score = 0; // 分數
     private int life = 3; // 玩家生命值
+    private int level = 1; // 難度等級
     private boolean gameOver = false; // 遊戲結束判定
 
     public GamePanel() {
         setPreferredSize(new Dimension(600, 400));
-        setBackground(Color.BLACK);
+        setBackground(new Color(10, 10, 30)); // 改為深藍色背景
         setFocusable(true);
         addKeyListener(this);
 
@@ -39,34 +40,48 @@ public class GamePanel extends JPanel implements ActionListener, KeyListener {
     @Override
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
+        Graphics2D g2d = (Graphics2D) g;
+        g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 
-        // 畫出玩家砲台
-        g.setColor(Color.GREEN);
-        g.fillRect(playerX, 370, playerWidth, 10);
+        // 畫出玩家砲台（亮藍 + 邊框）
+        g2d.setColor(Color.CYAN);
+        g2d.fillRoundRect(playerX, 370, playerWidth, 12, 10, 10);
+        g2d.setColor(Color.WHITE);
+        g2d.drawRoundRect(playerX, 370, playerWidth, 12, 10, 10);
 
-        // 畫出子彈
-        g.setColor(Color.YELLOW);
+        // 畫出子彈（亮橘色）
+        g2d.setColor(Color.ORANGE);
         for (Bullet b : bullets) {
-            g.fillRect(b.x, b.y, 4, 10);
+            g2d.fillRoundRect(b.x, b.y, 4, 10, 4, 4);
         }
 
-        // 畫出 UFO 敵人
-        g.setColor(Color.RED);
+        // 畫出 UFO 敵人（銀灰 + 陰影）
         for (UFO u : ufos) {
-            g.fillOval(u.x, u.y, 40, 20);
+            g2d.setColor(Color.DARK_GRAY);
+            g2d.fillOval(u.x + 3, u.y + 3, 40, 20); // 陰影
+            g2d.setColor(Color.LIGHT_GRAY);
+            g2d.fillOval(u.x, u.y, 40, 20); // 本體
+            g2d.setColor(Color.GRAY);
+            g2d.drawOval(u.x, u.y, 40, 20); // 邊框
         }
 
-        // 畫出分數與生命值
-        g.setColor(Color.WHITE);
-        g.drawString("Score: " + score, 10, 20);
-        g.drawString("Life: " + life, 10, 40);
+        // 畫出分數、生命值與等級（白字 + 粗體）
+        g2d.setColor(Color.WHITE);
+        g2d.setFont(new Font("Consolas", Font.BOLD, 14));
+        g2d.drawString("Score: " + score, 10, 20);
+        g2d.drawString("Life: " + life, 10, 40);
+        g2d.drawString("Level: " + level, getWidth() - 100, 20);
 
-        // 若遊戲結束，顯示 Game Over 訊息
+        // 若遊戲結束，顯示 Game Over 訊息（半透明黑底）
         if (gameOver) {
-            g.setFont(new Font("Arial", Font.BOLD, 30));
-            g.drawString("Game Over!", 200, 180);
-            g.setFont(new Font("Arial", Font.PLAIN, 16));
-            g.drawString("Press R to restart", 210, 220);
+            g2d.setColor(new Color(0, 0, 0, 180));
+            g2d.fillRect(0, 0, getWidth(), getHeight());
+
+            g2d.setColor(Color.WHITE);
+            g2d.setFont(new Font("Arial", Font.BOLD, 30));
+            g2d.drawString("Game Over!", 200, 180);
+            g2d.setFont(new Font("Arial", Font.PLAIN, 16));
+            g2d.drawString("Press R to restart", 210, 220);
         }
     }
 
@@ -88,7 +103,7 @@ public class GamePanel extends JPanel implements ActionListener, KeyListener {
         Iterator<UFO> uit = ufos.iterator();
         while (uit.hasNext()) {
             UFO u = uit.next();
-            u.move();
+            u.move(level); // 根據等級移動速度變化
             if (u.isOutOfScreen()) {
                 uit.remove(); // 移除掉落的 UFO
                 life--;       // 扣 1 點血
@@ -109,6 +124,7 @@ public class GamePanel extends JPanel implements ActionListener, KeyListener {
                     it.remove();
                     uit2.remove();
                     score += 10; // 擊中得分
+                    level = score / 100 + 1; // 每 100 分升 1 級
                     break;
                 }
             }
@@ -147,6 +163,7 @@ public class GamePanel extends JPanel implements ActionListener, KeyListener {
         ufos.clear();
         score = 0;
         life = 3;
+        level = 1;
         gameOver = false;
     }
 }
