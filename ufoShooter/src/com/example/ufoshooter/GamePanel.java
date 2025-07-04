@@ -18,6 +18,7 @@ public class GamePanel extends JPanel implements ActionListener, KeyListener {
     private int life = 3; // 玩家生命值
     private int level = 1; // 難度等級
     private boolean gameOver = false; // 遊戲結束判定
+    private boolean titleScreen = true; // 標題畫面狀態
 
     public GamePanel() {
         setPreferredSize(new Dimension(600, 400));
@@ -30,7 +31,7 @@ public class GamePanel extends JPanel implements ActionListener, KeyListener {
 
         // UFO 產生計時器（每 1 秒）
         new Timer(1000, e -> {
-            if (!gameOver) {
+            if (!gameOver && !titleScreen) {
                 int randomX = (int)(Math.random() * (getWidth() - 40));
                 ufos.add(new UFO(randomX, 0));
             }
@@ -57,6 +58,21 @@ public class GamePanel extends JPanel implements ActionListener, KeyListener {
         // 畫出背景星星
         for (Star s : stars) {
             s.draw(g2d);
+        }
+
+        // 標題畫面顯示
+        if (titleScreen) {
+            g2d.setColor(new Color(0, 0, 0, 180));
+            g2d.fillRect(0, 0, getWidth(), getHeight());
+
+            g2d.setColor(Color.WHITE);
+            g2d.setFont(new Font("Arial", Font.BOLD, 36));
+            g2d.drawString("UFO Shooter", 180, 160);
+
+            g2d.setFont(new Font("Arial", Font.PLAIN, 20));
+            g2d.drawString("By Peng Huai Ching", 200, 200);
+            g2d.drawString("Press any key to start", 180, 260);
+            return; // 不執行遊戲畫面繪製
         }
 
         // 畫出玩家砲台（亮藍 + 邊框）
@@ -108,7 +124,7 @@ public class GamePanel extends JPanel implements ActionListener, KeyListener {
 
     @Override
     public void actionPerformed(ActionEvent e) {
-        if (gameOver) return;
+        if (gameOver || titleScreen) return;
 
         // 星星移動動畫
         for (Star s : stars) {
@@ -172,6 +188,13 @@ public class GamePanel extends JPanel implements ActionListener, KeyListener {
 
     @Override
     public void keyPressed(KeyEvent e) {
+        // 標題畫面進入遊戲
+        if (titleScreen) {
+            titleScreen = false;
+            resetGame();
+            return;
+        }
+
         // ← 鍵：左移
         if (e.getKeyCode() == KeyEvent.VK_LEFT && playerX > 0) {
             playerX -= 10;
