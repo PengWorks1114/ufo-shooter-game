@@ -13,6 +13,7 @@ public class GamePanel extends JPanel implements ActionListener, KeyListener {
     private ArrayList<Bullet> bullets = new ArrayList<>();
     private ArrayList<UFO> ufos = new ArrayList<>(); // UFO 敵人列表
     private ArrayList<Star> stars = new ArrayList<>(); // 背景星星列表
+    private ArrayList<Explosion> explosions = new ArrayList<>(); // 爆炸動畫列表
     private int score = 0; // 分數
     private int life = 3; // 玩家生命值
     private int level = 1; // 難度等級
@@ -80,6 +81,11 @@ public class GamePanel extends JPanel implements ActionListener, KeyListener {
             g2d.drawOval(u.x, u.y, 40, 20); // 邊框
         }
 
+        // 畫出爆炸動畫
+        for (Explosion ex : explosions) {
+            ex.draw(g2d);
+        }
+
         // 畫出分數、生命值與等級（白字 + 粗體）
         g2d.setColor(Color.WHITE);
         g2d.setFont(new Font("Consolas", Font.BOLD, 14));
@@ -145,8 +151,19 @@ public class GamePanel extends JPanel implements ActionListener, KeyListener {
                     uit2.remove();
                     score += 10; // 擊中得分
                     level = score / 100 + 1; // 每 100 分升 1 級
+                    explosions.add(new Explosion(u.x + 20, u.y + 10)); // 加入爆炸動畫
                     break;
                 }
+            }
+        }
+
+        // 爆炸動畫更新與移除
+        Iterator<Explosion> eit = explosions.iterator();
+        while (eit.hasNext()) {
+            Explosion ex = eit.next();
+            ex.update();
+            if (ex.isFinished()) {
+                eit.remove();
             }
         }
 
@@ -181,6 +198,7 @@ public class GamePanel extends JPanel implements ActionListener, KeyListener {
         playerX = 250;
         bullets.clear();
         ufos.clear();
+        explosions.clear();
         score = 0;
         life = 3;
         level = 1;
