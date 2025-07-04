@@ -13,6 +13,7 @@ public class GamePanel extends JPanel implements ActionListener, KeyListener {
     private ArrayList<Bullet> bullets = new ArrayList<>();
     private ArrayList<UFO> ufos = new ArrayList<>(); // UFO 敵人列表
     private int score = 0; // 分數
+    private int life = 3; // 玩家生命值
     private boolean gameOver = false; // 遊戲結束判定
 
     public GamePanel() {
@@ -55,9 +56,10 @@ public class GamePanel extends JPanel implements ActionListener, KeyListener {
             g.fillOval(u.x, u.y, 40, 20);
         }
 
-        // 畫出分數
+        // 畫出分數與生命值
         g.setColor(Color.WHITE);
         g.drawString("Score: " + score, 10, 20);
+        g.drawString("Life: " + life, 10, 40);
 
         // 若遊戲結束，顯示 Game Over 訊息
         if (gameOver) {
@@ -82,13 +84,17 @@ public class GamePanel extends JPanel implements ActionListener, KeyListener {
             }
         }
 
-        // UFO 移動與 Game Over 判定
+        // UFO 移動與生命值扣減、Game Over 判定
         Iterator<UFO> uit = ufos.iterator();
         while (uit.hasNext()) {
             UFO u = uit.next();
             u.move();
             if (u.isOutOfScreen()) {
-                gameOver = true;
+                uit.remove(); // 移除掉落的 UFO
+                life--;       // 扣 1 點血
+                if (life <= 0) {
+                    gameOver = true;
+                }
             }
         }
 
@@ -140,6 +146,7 @@ public class GamePanel extends JPanel implements ActionListener, KeyListener {
         bullets.clear();
         ufos.clear();
         score = 0;
+        life = 3;
         gameOver = false;
     }
 }
