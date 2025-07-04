@@ -12,6 +12,7 @@ public class GamePanel extends JPanel implements ActionListener, KeyListener {
     private final int playerWidth = 40;
     private ArrayList<Bullet> bullets = new ArrayList<>();
     private ArrayList<UFO> ufos = new ArrayList<>(); // UFO 敵人列表
+    private ArrayList<Star> stars = new ArrayList<>(); // 背景星星列表
     private int score = 0; // 分數
     private int life = 3; // 玩家生命值
     private int level = 1; // 難度等級
@@ -34,6 +35,15 @@ public class GamePanel extends JPanel implements ActionListener, KeyListener {
             }
         }).start();
 
+        // 初始化背景星星
+        for (int i = 0; i < 100; i++) {
+            int x = (int)(Math.random() * 600);
+            int y = (int)(Math.random() * 400);
+            int speed = 1 + (int)(Math.random() * 2);
+            Color color = new Color(200 + (int)(Math.random() * 55), 200 + (int)(Math.random() * 55), 200 + (int)(Math.random() * 55));
+            stars.add(new Star(x, y, speed, color));
+        }
+
         requestFocusInWindow(); // 確保能接收鍵盤輸入
     }
 
@@ -42,6 +52,11 @@ public class GamePanel extends JPanel implements ActionListener, KeyListener {
         super.paintComponent(g);
         Graphics2D g2d = (Graphics2D) g;
         g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+
+        // 畫出背景星星
+        for (Star s : stars) {
+            s.draw(g2d);
+        }
 
         // 畫出玩家砲台（亮藍 + 邊框）
         g2d.setColor(Color.CYAN);
@@ -88,6 +103,11 @@ public class GamePanel extends JPanel implements ActionListener, KeyListener {
     @Override
     public void actionPerformed(ActionEvent e) {
         if (gameOver) return;
+
+        // 星星移動動畫
+        for (Star s : stars) {
+            s.move();
+        }
 
         // 子彈移動與移除畫面外的子彈
         Iterator<Bullet> it = bullets.iterator();
